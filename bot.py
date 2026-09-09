@@ -96,15 +96,19 @@ def criar_pix(chat_id):
         copia_cola = metodo.get("qr_code")
 
     except (KeyError, IndexError, TypeError):
+
         enviar_mensagem(
             chat_id,
             "❌ O Mercado Pago respondeu, "
             "mas não encontrei os dados do Pix."
         )
+
         return
 
     if qr_base64:
+
         try:
+
             imagem = base64.b64decode(qr_base64)
 
             requests.post(
@@ -126,6 +130,7 @@ def criar_pix(chat_id):
             )
 
         except Exception as erro:
+
             print(
                 "ERRO AO ENVIAR QR CODE:",
                 erro,
@@ -133,11 +138,14 @@ def criar_pix(chat_id):
             )
 
     if copia_cola:
+
         enviar_mensagem(
             chat_id,
             f"📋 Pix Copia e Cola:\n\n{copia_cola}"
         )
+
     else:
+
         enviar_mensagem(
             chat_id,
             "⚠️ O Pix foi criado, mas o código "
@@ -147,7 +155,48 @@ def criar_pix(chat_id):
 
 @app.route("/", methods=["GET"])
 def inicio():
-    return "Bot online", 200
+
+    return """
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        >
+
+        <title>TP Intermediações de Pagamentos</title>
+
+    </head>
+
+    <body
+        style="
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        "
+    >
+
+        <h1>
+            TP Intermediações de Pagamentos
+        </h1>
+
+        <p>
+            Intermediação de pagamentos para produtos digitais.
+        </p>
+
+        <p>
+            Atendimento e vendas realizados através do Telegram.
+        </p>
+
+    </body>
+
+    </html>
+    """, 200
 
 
 @app.route("/telegram/webhook", methods=["POST"])
