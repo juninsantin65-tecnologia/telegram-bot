@@ -55,7 +55,7 @@ def enviar_menu(chat_id):
     teclado = {
         "inline_keyboard": [[
             {
-                "text": "🔥 ACESSAR AGORA",
+                "text": "🔥 Acessar agora R$4,99🔥",
                 "callback_data": "comprar"
             }
         ]]
