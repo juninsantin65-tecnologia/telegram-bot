@@ -1,6 +1,7 @@
 import os
 import uuid
 import base64
+import json
 import requests
 from flask import Flask, request
 
@@ -28,63 +29,119 @@ def enviar_mensagem(chat_id, texto, teclado=None):
     if teclado:
         dados["reply_markup"] = teclado
 
-    requests.post(
-        f"{TELEGRAM_API}/sendMessage",
-        json=dados,
-        timeout=20
-    )
+    try:
+        resposta = requests.post(
+            f"{TELEGRAM_API}/sendMessage",
+            json=dados,
+            timeout=20
+        )
+
+        print(
+            "TELEGRAM SENDMESSAGE:",
+            resposta.status_code,
+            flush=True
+        )
+
+    except Exception as erro:
+        print(
+            "ERRO TELEGRAM:",
+            erro,
+            flush=True
+        )
 
 
 def enviar_menu(chat_id):
     teclado = {
         "inline_keyboard": [[
             {
-                "text": "🔥 GRUPO VITALÍCIO",
+                "text": "🔥 ACESSAR AGORA",
                 "callback_data": "comprar"
             }
         ]]
     }
 
-    texto = (
-        “🔥 𝙋𝙍𝙊𝙈𝙊𝘾̧𝘼̃𝙊 𝙀𝙓𝘾𝙇𝙐𝙎𝙄𝙑𝘼 – 𝙑𝘼𝙕𝘼𝘿𝙊𝙎 🔥”
+    texto = """🔥 𝙋𝙍𝙊𝙈𝙊𝘾̧𝘼̃𝙊 𝙀𝙓𝘾𝙇𝙐𝙎𝙄𝙑𝘼 🔥
 
-“Você viu… pensou… saiu…
-Mas o acesso ainda está disponível por tempo limitado ⏳”
+Você viu… pensou… saiu…
+Mas o acesso ainda está disponível por tempo limitado ⏳
 
-“📲 𝘼𝙘𝙚𝙨𝙨𝙤 𝙞𝙢𝙚𝙙𝙞𝙖𝙩𝙤 𝙣𝙤 𝙏𝙚𝙡𝙚𝙜𝙧𝙖𝙢”
-“🔞 𝘾𝙤𝙣𝙩𝙚𝙪́𝙙𝙤𝙨 𝙘𝙤𝙢𝙥𝙡𝙚𝙩𝙤𝙨, sem cortes”
-“🚫 𝙎𝙚𝙢 𝙖𝙣𝙪́𝙣𝙘𝙞𝙤𝙨”
-“⚡ 𝘼𝙩𝙪𝙖𝙡𝙞𝙯𝙖𝙘̧𝙤̃𝙚𝙨 𝙛𝙧𝙚𝙦𝙪𝙚𝙣𝙩𝙚𝙨”
-“📂 𝙏𝙪𝙙𝙤 𝙤𝙧𝙜𝙖𝙣𝙞𝙯𝙖𝙙𝙤 pra você entrar e assistir na hora”
+📲 𝘼𝙘𝙚𝙨𝙨𝙤 𝙞𝙢𝙚𝙙𝙞𝙖𝙩𝙤 𝙣𝙤 𝙏𝙚𝙡𝙚𝙜𝙧𝙖𝙢
+🔞 𝘾𝙤𝙣𝙩𝙚𝙪́𝙙𝙤𝙨 𝙘𝙤𝙢𝙥𝙡𝙚𝙩𝙤𝙨, sem cortes
+⚡ 𝘼𝙩𝙪𝙖𝙡𝙞𝙯𝙖𝙘̧𝙤̃𝙚𝙨 𝙛𝙧𝙚𝙦𝙪𝙚𝙣𝙩𝙚𝙨
+📂 𝙏𝙪𝙙𝙤 𝙤𝙧𝙜𝙖𝙣𝙞𝙯𝙖𝙙𝙤 para você acessar na hora
 
-“💥 𝙋𝙍𝙀𝘾̧𝙊 𝙋𝙍𝙊𝙈𝙊𝘾𝙄𝙊𝙉𝘼𝙇”
-“✨ 𝙀𝙓𝘾𝙇𝙐𝙎𝙄𝙑𝙊 𝙋𝘼𝙍𝘼 𝙌𝙐𝙀𝙈 𝙑𝙊𝙇𝙏𝙊𝙐”
-“Depois que sair, não aparece de novo 👀”
+💥 𝙋𝙍𝙀𝘾̧𝙊 𝙋𝙍𝙊𝙈𝙊𝘾𝙄𝙊𝙉𝘼𝙇
+✨ 𝙀𝙓𝘾𝙇𝙐𝙎𝙄𝙑𝙊 𝙋𝘼𝙍𝘼 𝙌𝙐𝙀𝙈 𝙑𝙊𝙇𝙏𝙊𝙐
 
-“👉 𝙀𝙣𝙩𝙧𝙚 𝙖𝙜𝙤𝙧𝙖 e garanta seu acesso antes do encerramento 🔥📲”
-    )
+Depois que sair, não aparece de novo 👀
+
+👉 𝙀𝙣𝙩𝙧𝙚 𝙖𝙜𝙤𝙧𝙖 e garanta seu acesso 🔥📲"""
 
     if VIDEO_FILE_ID:
-        requests.post(
-            f"{TELEGRAM_API}/sendVideo",
-            data={
-                "chat_id": chat_id,
-                "video": VIDEO_FILE_ID,
-                "caption": texto,
-                "reply_markup": str(teclado).replace("'", '"')
-            },
-            timeout=20
-        )
+        try:
+            resposta = requests.post(
+                f"{TELEGRAM_API}/sendVideo",
+                data={
+                    "chat_id": chat_id,
+                    "video": VIDEO_FILE_ID,
+                    "caption": texto,
+                    "reply_markup": json.dumps(
+                        teclado,
+                        ensure_ascii=False
+                    )
+                },
+                timeout=30
+            )
+
+            print(
+                "TELEGRAM SENDVIDEO:",
+                resposta.status_code,
+                flush=True
+            )
+
+            print(
+                "RESPOSTA SENDVIDEO:",
+                resposta.text,
+                flush=True
+            )
+
+        except Exception as erro:
+            print(
+                "ERRO AO ENVIAR VIDEO:",
+                erro,
+                flush=True
+            )
+
+            enviar_mensagem(
+                chat_id,
+                texto,
+                teclado
+            )
+
     else:
-        enviar_mensagem(chat_id, texto, teclado)
+        enviar_mensagem(
+            chat_id,
+            texto,
+            teclado
+        )
 
 
 def responder_callback(callback_id):
-    requests.post(
-        f"{TELEGRAM_API}/answerCallbackQuery",
-        json={"callback_query_id": callback_id},
-        timeout=20
-    )
+    try:
+        requests.post(
+            f"{TELEGRAM_API}/answerCallbackQuery",
+            json={
+                "callback_query_id": callback_id
+            },
+            timeout=20
+        )
+
+    except Exception as erro:
+        print(
+            "ERRO CALLBACK:",
+            erro,
+            flush=True
+        )
 
 
 def criar_pix(chat_id):
@@ -117,19 +174,34 @@ def criar_pix(chat_id):
         }
     }
 
-    resposta = requests.post(
-        "https://api.mercadopago.com/v1/orders",
-        headers={
-            "Authorization": f"Bearer {MP_ACCESS_TOKEN}",
-            "Content-Type": "application/json",
-            "X-Idempotency-Key": str(uuid.uuid4())
-        },
-        json=dados,
-        timeout=30
-    )
+    try:
+        resposta = requests.post(
+            "https://api.mercadopago.com/v1/orders",
+            headers={
+                "Authorization": f"Bearer {MP_ACCESS_TOKEN}",
+                "Content-Type": "application/json",
+                "X-Idempotency-Key": str(uuid.uuid4())
+            },
+            json=dados,
+            timeout=30
+        )
+
+    except Exception as erro:
+        print(
+            "ERRO MERCADO PAGO:",
+            erro,
+            flush=True
+        )
+
+        enviar_mensagem(
+            chat_id,
+            "❌ Não foi possível conectar ao sistema de pagamento."
+        )
+        return
 
     try:
         resultado = resposta.json()
+
     except Exception:
         resultado = {}
 
@@ -138,6 +210,7 @@ def criar_pix(chat_id):
         resposta.status_code,
         flush=True
     )
+
     print(
         "RESPOSTA:",
         resultado,
@@ -170,7 +243,7 @@ def criar_pix(chat_id):
         try:
             imagem = base64.b64decode(qr_base64)
 
-            requests.post(
+            resposta_qr = requests.post(
                 f"{TELEGRAM_API}/sendPhoto",
                 data={
                     "chat_id": chat_id,
@@ -188,6 +261,12 @@ def criar_pix(chat_id):
                     )
                 },
                 timeout=30
+            )
+
+            print(
+                "ENVIO QR CODE:",
+                resposta_qr.status_code,
+                flush=True
             )
 
         except Exception as erro:
@@ -214,13 +293,22 @@ def criar_pix(chat_id):
 
 
 def verificar_pedido(order_id):
-    resposta = requests.get(
-        f"https://api.mercadopago.com/v1/orders/{order_id}",
-        headers={
-            "Authorization": f"Bearer {MP_ACCESS_TOKEN}"
-        },
-        timeout=20
-    )
+    try:
+        resposta = requests.get(
+            f"https://api.mercadopago.com/v1/orders/{order_id}",
+            headers={
+                "Authorization": f"Bearer {MP_ACCESS_TOKEN}"
+            },
+            timeout=20
+        )
+
+    except Exception as erro:
+        print(
+            "ERRO VERIFICANDO PEDIDO:",
+            erro,
+            flush=True
+        )
+        return None
 
     print(
         "VERIFICAÇÃO DO PEDIDO:",
@@ -234,6 +322,7 @@ def verificar_pedido(order_id):
 
     try:
         return resposta.json()
+
     except Exception:
         return None
 
@@ -268,19 +357,40 @@ def liberar_acesso(order_id):
     )
 
     if not pagamento_aprovado(dados):
+        print(
+            "PAGAMENTO AINDA NÃO APROVADO:",
+            order_id,
+            flush=True
+        )
         return
 
     if order_id in acessos_liberados:
+        print(
+            "ACESSO JÁ LIBERADO:",
+            order_id,
+            flush=True
+        )
         return
 
     referencia = dados.get("external_reference")
 
     if not referencia:
+        print(
+            "SEM EXTERNAL_REFERENCE:",
+            order_id,
+            flush=True
+        )
         return
 
     try:
         chat_id = int(referencia)
+
     except ValueError:
+        print(
+            "EXTERNAL_REFERENCE INVÁLIDA:",
+            referencia,
+            flush=True
+        )
         return
 
     acessos_liberados.add(order_id)
@@ -298,6 +408,12 @@ def liberar_acesso(order_id):
         "✅ PAGAMENTO APROVADO!\n\n"
         "🎉 Seu acesso foi liberado!\n\n"
         f"👉 {GRUPO_LINK}"
+    )
+
+    print(
+        "ACESSO LIBERADO PARA:",
+        chat_id,
+        flush=True
     )
 
 
@@ -339,7 +455,6 @@ def telegram_webhook():
         if not chat_id:
             return "OK", 200
 
-        # Captura o ID do vídeo enviado ao bot
         video = mensagem.get("video")
 
         if video:
@@ -368,7 +483,7 @@ def telegram_webhook():
                 chat_id,
                 "📧 E-mail salvo ✅\n\n"
                 "Agora clique novamente em:\n"
-                "🔥 GRUPO VITALÍCIO"
+                "🔥 ACESSAR AGORA"
             )
 
         elif texto == "/pix":
@@ -403,6 +518,7 @@ def telegram_webhook():
                     chat_id,
                     "📧 Para continuar, envie seu e-mail."
                 )
+
             else:
                 criar_pix(chat_id)
 
