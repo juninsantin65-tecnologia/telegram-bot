@@ -46,12 +46,22 @@ def enviar_menu(chat_id):
     }
 
     texto = (
-        "🛍️ BEM-VINDO À NOSSA LOJA!\n\n"
-        "✨ Confira nossos produtos\n"
-        "⚡ Acesso rápido\n"
-        "💳 Pagamento via Pix\n"
-        "✅ Liberação após confirmação\n\n"
-        "👇 Clique no botão abaixo para continuar:"
+        “🔥 𝙋𝙍𝙊𝙈𝙊𝘾̧𝘼̃𝙊 𝙀𝙓𝘾𝙇𝙐𝙎𝙄𝙑𝘼 – 𝙑𝘼𝙕𝘼𝘿𝙊𝙎 🔥”
+
+“Você viu… pensou… saiu…
+Mas o acesso ainda está disponível por tempo limitado ⏳”
+
+“📲 𝘼𝙘𝙚𝙨𝙨𝙤 𝙞𝙢𝙚𝙙𝙞𝙖𝙩𝙤 𝙣𝙤 𝙏𝙚𝙡𝙚𝙜𝙧𝙖𝙢”
+“🔞 𝘾𝙤𝙣𝙩𝙚𝙪́𝙙𝙤𝙨 𝙘𝙤𝙢𝙥𝙡𝙚𝙩𝙤𝙨, sem cortes”
+“🚫 𝙎𝙚𝙢 𝙖𝙣𝙪́𝙣𝙘𝙞𝙤𝙨”
+“⚡ 𝘼𝙩𝙪𝙖𝙡𝙞𝙯𝙖𝙘̧𝙤̃𝙚𝙨 𝙛𝙧𝙚𝙦𝙪𝙚𝙣𝙩𝙚𝙨”
+“📂 𝙏𝙪𝙙𝙤 𝙤𝙧𝙜𝙖𝙣𝙞𝙯𝙖𝙙𝙤 pra você entrar e assistir na hora”
+
+“💥 𝙋𝙍𝙀𝘾̧𝙊 𝙋𝙍𝙊𝙈𝙊𝘾𝙄𝙊𝙉𝘼𝙇”
+“✨ 𝙀𝙓𝘾𝙇𝙐𝙎𝙄𝙑𝙊 𝙋𝘼𝙍𝘼 𝙌𝙐𝙀𝙈 𝙑𝙊𝙇𝙏𝙊𝙐”
+“Depois que sair, não aparece de novo 👀”
+
+“👉 𝙀𝙣𝙩𝙧𝙚 𝙖𝙜𝙤𝙧𝙖 e garanta seu acesso antes do encerramento 🔥📲”
     )
 
     if VIDEO_FILE_ID:
