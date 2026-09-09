@@ -27,11 +27,6 @@ def enviar_mensagem(chat_id, texto):
 
 
 def criar_pix(chat_id):
-    email = usuarios.get(chat_id)
-
-    if not email:
-        enviar_mensagem(chat_id, "Digite seu e-mail primeiro.")
-        return
 
     dados = {
         "type": "online",
@@ -50,7 +45,7 @@ def criar_pix(chat_id):
             ]
         },
         "payer": {
-            "email": email,
+            "email": "test_user_br@testuser.com",
             "first_name": "APRO"
         }
     }
@@ -67,40 +62,81 @@ def criar_pix(chat_id):
 
     resultado = resposta.json()
 
-    print("STATUS MERCADO PAGO:", resposta.status_code)
-    print("RESPOSTA MERCADO PAGO:", resultado)
+    print(
+        "STATUS MERCADO PAGO:",
+        resposta.status_code,
+        flush=True
+    )
+
+    print(
+        "RESPOSTA MERCADO PAGO:",
+        resultado,
+        flush=True
+    )
 
     if resposta.status_code >= 400:
         enviar_mensagem(
             chat_id,
-            "Não consegui gerar o Pix agora. Tente novamente."
+            f"❌ Erro ao gerar Pix.\n\n"
+            f"Código: {resposta.status_code}"
         )
         return
 
-    pagamento = resultado["transactions"]["payments"][0]
-    metodo = pagamento["payment_method"]
+    try:
+        pagamento = resultado["transactions"]["payments"][0]
+        metodo = pagamento["payment_method"]
 
-    qr_base64 = metodo.get("qr_code_base64")
-    copia_cola = metodo.get("qr_code")
+        qr_base64 = metodo.get("qr_code_base64")
+        copia_cola = metodo.get("qr_code")
+
+    except (KeyError, IndexError, TypeError):
+        enviar_mensagem(
+            chat_id,
+            "❌ O Mercado Pago respondeu, "
+            "mas não encontrei os dados do Pix."
+        )
+        return
 
     if qr_base64:
-        imagem = base64.b64decode(qr_base64)
+        try:
+            imagem = base64.b64decode(qr_base64)
 
-        requests.post(
-            f"{TELEGRAM_API}/sendPhoto",
-            data={
-                "chat_id": chat_id,
-                "caption": "💳 Pix de R$ 50,00\n\nPix de teste do Mercado Pago."
-            },
-            files={
-                "photo": ("pix.png", imagem, "image/png")
-            }
+            requests.post(
+                f"{TELEGRAM_API}/sendPhoto",
+                data={
+                    "chat_id": chat_id,
+                    "caption": (
+                        "💳 Pix de R$ 50,00\n\n"
+                        "Pix de teste do Mercado Pago."
+                    )
+                },
+                files={
+                    "photo": (
+                        "pix.png",
+                        imagem,
+                        "image/png"
+                    )
+                }
+            )
+
+        except Exception as erro:
+            print(
+                "ERRO AO ENVIAR QR CODE:",
+                erro,
+                flush=True
+            )
+
+    if copia_cola:
+        enviar_mensagem(
+            chat_id,
+            f"📋 Pix Copia e Cola:\n\n{copia_cola}"
         )
-
-    enviar_mensagem(
-        chat_id,
-        f"📋 Pix Copia e Cola:\n\n{copia_cola}"
-    )
+    else:
+        enviar_mensagem(
+            chat_id,
+            "⚠️ O Pix foi criado, mas o código "
+            "Copia e Cola não foi retornado."
+        )
 
 
 @app.route("/", methods=["GET"])
@@ -110,12 +146,18 @@ def inicio():
 
 @app.route("/telegram/webhook", methods=["POST"])
 def telegram_webhook():
+
     dados = request.get_json(silent=True) or {}
 
-    print("TELEGRAM RECEBIDO:", dados)
+    print(
+        "TELEGRAM RECEBIDO:",
+        dados,
+        flush=True
+    )
 
     mensagem = dados.get("message", {})
     chat = mensagem.get("chat", {})
+
     texto = mensagem.get("text", "").strip()
 
     chat_id = chat.get("id")
@@ -124,6 +166,7 @@ def telegram_webhook():
         return "OK", 200
 
     if texto == "/start":
+
         enviar_mensagem(
             chat_id,
             "Olá! 👋\n\n"
@@ -132,6 +175,7 @@ def telegram_webhook():
         )
 
     elif "@" in texto and " " not in texto:
+
         usuarios[chat_id] = texto
 
         enviar_mensagem(
@@ -142,6 +186,7 @@ def telegram_webhook():
         )
 
     elif texto == "/pix":
+
         criar_pix(chat_id)
 
     return "OK", 200
@@ -149,13 +194,25 @@ def telegram_webhook():
 
 @app.route("/mercadopago/webhook", methods=["POST"])
 def mercadopago_webhook():
+
     dados = request.get_json(silent=True) or {}
 
-    print("MERCADO PAGO WEBHOOK:", dados)
+    print(
+        "MERCADO PAGO WEBHOOK:",
+        dados,
+        flush=True
+    )
 
     return "OK", 200
 
 
 if __name__ == "__main__":
-    porta = int(os.getenv("PORT", 10000))
-    app.run(host="0.0.0.0", port=porta)
+
+    porta = int(
+        os.getenv("PORT", 10000)
+    )
+
+    app.run(
+        host="0.0.0.0",
+        port=porta
+    )
