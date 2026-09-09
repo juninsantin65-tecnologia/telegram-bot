@@ -23,7 +23,8 @@ acessos_liberados = set()
 def enviar_mensagem(chat_id, texto, teclado=None):
     dados = {
         "chat_id": chat_id,
-        "text": texto
+        "text": texto,
+        "parse_mode": "Markdown"
     }
 
     if teclado:
@@ -279,15 +280,16 @@ def criar_pix(chat_id):
     if copia_cola:
         enviar_mensagem(
             chat_id,
-            f"📋 PIX COPIA E COLA:\n\n"
-            f"{copia_cola}\n\n"
+            "📋 *PIX COPIA E COLA:*\n\n"
+            f"`{copia_cola}`\n\n"
+            "👆 Toque no código acima para copiar\n\n"
             "Após pagar, aguarde a confirmação automática."
         )
 
     elif ticket_url:
         enviar_mensagem(
             chat_id,
-            f"💳 Abra o link abaixo para visualizar o pagamento:\n\n"
+            "💳 Abra o link abaixo para visualizar o pagamento:\n\n"
             f"{ticket_url}"
         )
 
