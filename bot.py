@@ -11,7 +11,7 @@ MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
-VALOR = "50.00"
+VALOR = "4,99"
 
 usuarios = {}
 
