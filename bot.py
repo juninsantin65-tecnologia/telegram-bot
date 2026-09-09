@@ -11,9 +11,8 @@ MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
-VALOR = "4.99"
+VALOR = "50.00"
 
-# Guarda temporariamente o e-mail informado por cada usuário
 usuarios = {}
 
 
@@ -31,18 +30,13 @@ def criar_pix(chat_id):
     email = usuarios.get(chat_id)
 
     if not email:
-        enviar_mensagem(
-            chat_id,
-            "Digite seu e-mail primeiro."
-        )
+        enviar_mensagem(chat_id, "Digite seu e-mail primeiro.")
         return
-
-    external_reference = str(chat_id)
 
     dados = {
         "type": "online",
         "total_amount": VALOR,
-        "external_reference": external_reference,
+        "external_reference": str(chat_id),
         "processing_mode": "automatic",
         "transactions": {
             "payments": [
@@ -56,7 +50,8 @@ def criar_pix(chat_id):
             ]
         },
         "payer": {
-            "email": email
+            "email": email,
+            "first_name": "APRO"
         }
     }
 
@@ -72,12 +67,14 @@ def criar_pix(chat_id):
 
     resultado = resposta.json()
 
+    print("STATUS MERCADO PAGO:", resposta.status_code)
+    print("RESPOSTA MERCADO PAGO:", resultado)
+
     if resposta.status_code >= 400:
         enviar_mensagem(
             chat_id,
             "Não consegui gerar o Pix agora. Tente novamente."
         )
-        print("ERRO MERCADO PAGO:", resultado)
         return
 
     pagamento = resultado["transactions"]["payments"][0]
@@ -93,7 +90,7 @@ def criar_pix(chat_id):
             f"{TELEGRAM_API}/sendPhoto",
             data={
                 "chat_id": chat_id,
-                "caption": "💳 Pix de R$ 4,99\n\nDepois de pagar, aguarde a confirmação automática."
+                "caption": "💳 Pix de R$ 50,00\n\nPix de teste do Mercado Pago."
             },
             files={
                 "photo": ("pix.png", imagem, "image/png")
@@ -115,6 +112,8 @@ def inicio():
 def telegram_webhook():
     dados = request.get_json(silent=True) or {}
 
+    print("TELEGRAM RECEBIDO:", dados)
+
     mensagem = dados.get("message", {})
     chat = mensagem.get("chat", {})
     texto = mensagem.get("text", "").strip()
@@ -129,7 +128,7 @@ def telegram_webhook():
             chat_id,
             "Olá! 👋\n\n"
             "Bem-vindo!\n\n"
-            "Para começar, envie seu e-mail."
+            "Envie seu e-mail para continuar."
         )
 
     elif "@" in texto and " " not in texto:
