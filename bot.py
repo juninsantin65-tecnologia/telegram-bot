@@ -1,23 +1,32 @@
 import os
 import requests
 from flask import Flask, request
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 app = Flask(__name__)
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
-GRUPO_PRODUTOS_LINK = "https://t.me/+0xV30mWWl2A5OThh"
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
+GRUPO_PRODUTOS_LINK = "https://t.me/+0xV30mWWl2A5OThh"
 
-def send_message(chat_id, text):
+PAGAMENTO_LINK = "https://mpago.la/2akiy3E"
+
+
+def send_message(chat_id, text, keyboard=None):
+    data = {
+        "chat_id": chat_id,
+        "text": text
+    }
+
+    if keyboard:
+        data["reply_markup"] = keyboard
+
     requests.post(
         f"{TELEGRAM_API}/sendMessage",
-        json={
-            "chat_id": chat_id,
-            "text": text
-        }
+        json=data
     )
 
 
@@ -38,9 +47,23 @@ def telegram_webhook():
         chat_id = chat["id"]
 
         if text == "/start":
+            keyboard = {
+                "inline_keyboard": [
+                    [
+                        {
+                            "text": "💳 COMPRAR CAPINHA — R$ 4,99",
+                            "url": PAGAMENTO_LINK
+                        }
+                    ]
+                ]
+            }
+
             send_message(
                 chat_id,
-                "Olá! 👋\n\nBem-vindo!\n\nEm breve você poderá fazer sua compra por Pix aqui mesmo no Telegram."
+                "Olá! 👋\n\n"
+                "Bem-vindo!\n\n"
+                "Clique no botão abaixo para comprar:",
+                keyboard
             )
 
     return "OK", 200
