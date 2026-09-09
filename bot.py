@@ -69,6 +69,12 @@ def criar_pix(chat_id):
     )
 
     print(
+        "ORDER ID:",
+        resultado.get("id"),
+        flush=True
+    )
+
+    print(
         "RESPOSTA MERCADO PAGO:",
         resultado,
         flush=True
