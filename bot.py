@@ -1,7 +1,6 @@
 import os
 import requests
 from flask import Flask, request
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 app = Flask(__name__)
 
@@ -10,74 +9,54 @@ MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
-GRUPO_PRODUTOS_LINK = "https://t.me/+0xV30mWWl2A5OThh"
-
 PAGAMENTO_LINK = "https://mpago.la/2akiy3E"
 
 
-def send_message(chat_id, text, keyboard=None):
-    data = {
-        "chat_id": chat_id,
-        "text": text
-    }
-
-    if keyboard:
-        data["reply_markup"] = keyboard
-
+def enviar_mensagem(chat_id, texto):
     requests.post(
         f"{TELEGRAM_API}/sendMessage",
-        json=data
+        json={
+            "chat_id": chat_id,
+            "text": texto
+        }
     )
 
 
 @app.route("/", methods=["GET"])
-def home():
+def inicio():
     return "Bot online", 200
 
 
 @app.route("/telegram/webhook", methods=["POST"])
 def telegram_webhook():
-    data = request.get_json(silent=True) or {}
+    dados = request.get_json(silent=True) or {}
 
-    message = data.get("message", {})
-    chat = message.get("chat", {})
-    text = message.get("text", "")
+    mensagem = dados.get("message", {})
+    chat = mensagem.get("chat", {})
+    texto = mensagem.get("text", "")
 
-    if chat.get("id"):
+    if chat.get("id") and texto == "/start":
         chat_id = chat["id"]
 
-        if text == "/start":
-            keyboard = {
-                "inline_keyboard": [
-                    [
-                        {
-                            "text": "💳 COMPRAR CAPINHA — R$ 4,99",
-                            "url": PAGAMENTO_LINK
-                        }
-                    ]
-                ]
-            }
-
-            send_message(
-                chat_id,
-                "Olá! 👋\n\n"
-                "Bem-vindo!\n\n"
-                "Clique no botão abaixo para comprar:",
-                keyboard
-            )
+        enviar_mensagem(
+            chat_id,
+            "Olá! 👋\n\n"
+            "Bem-vindo!\n\n"
+            "💳 Para comprar sua capinha, acesse:\n"
+            f"{PAGAMENTO_LINK}"
+        )
 
     return "OK", 200
 
 
 @app.route("/mercadopago/webhook", methods=["POST"])
 def mercadopago_webhook():
-    data = request.get_json(silent=True) or {}
-
-    print("Mercado Pago webhook:", data)
+    dados = request.get_json(silent=True) or {}
+    print("Mercado Pago:", dados)
 
     return "OK", 200
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    porta = int(os.getenv("PORT", 10000))
+    app.run(host="0.0.0.0", port=porta)
